@@ -404,6 +404,24 @@
           saveTodos()
         }
 
+        const saveTodos = () => {
+          localStorage.setItem('vue-todos', JSON.stringify(todos.value))
+        }
+
+        const loadTodos = () => {
+          const saved = localStorage.getItem('vue-todos')
+          if (saved) {
+            todos.value = JSON.parse(saved).map(todo => ({
+              ...todo,
+              createdAt: new Date(todo.createdAt)
+            }))
+          }
+        }
+
+        onMounted(() => {
+          loadTodos()
+        })
+
         return {
           newTodo,
           todos,
@@ -414,7 +432,8 @@
           filteredTodos,
           addTodo,
           removeTodo,
-          clearCompleted
+          clearCompleted,
+          saveTodos
         }
       }
     }).mount('#app')
