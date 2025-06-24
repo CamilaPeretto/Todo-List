@@ -217,6 +217,39 @@
       background: #fee;
     }
 
+    .app-footer {
+      background: #f8f9fa;
+      padding: 1.5rem 2rem;
+      border-top: 1px solid #e9ecef;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+}
+
+    .stats {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+
+    .clear-btn {
+      padding: 0.5rem 1rem;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.3s ease;
+    }
+
+    .clear-btn:hover {
+      background: #c82333;
+    }
+
     @media (max-width: 768px) {
       
       .app-header h1 {
@@ -239,6 +272,16 @@
         margin-left: 0;
         margin-right: 0;
       }
+
+      .app-footer {
+        flex-direction: column;
+        text-align: center;
+      }
+    
+      .stats {
+      justify-content: center;
+      }
+
     }
 
   </style>
@@ -281,6 +324,16 @@
             </li>
         </transition-group>
       </div>
+
+      <footer class="app-footer">
+        <div class="stats">
+          <span>Total: {{ todos.length }}</span> <!---->
+          <span>Ativas: {{ activeTodos.length }}</span> <!---->
+          <span>Concluídas: {{ completedTodos.length }}</span> <!---->
+        </div>
+        <button v-if="completedTodos.length > 0" @click="clearCompleted" class="clear-btn">Limpar Concluídas</button> <!---->
+      </footer>
+
     </div>
   </div>
 
@@ -298,6 +351,20 @@
           { key: 'active', label: 'Ativas' },
           { key: 'completed', label: 'Concluídas' }
         ]
+
+        const activeTodos = computed(() => todos.value.filter(todo => !todo.completed))
+        const completedTodos = computed(() => todos.value.filter(todo => todo.completed))
+
+        const filteredTodos = computed(() => {
+          switch (currentFilter.value) {
+            case 'active':
+              return activeTodos.value
+            case 'completed':
+              return completedTodos.value
+            default:
+              return todos.value
+          }
+        })
 
         const addTodo = () => {
           if (newTodo.value.trim()) {
@@ -325,14 +392,15 @@
 
         return {
           newTodo,
-          message,
-          addTodo,
-          removeTodo,
-          clearCompleted,
+          todos,
           currentFilter,
           filters,
-          saveTodos,
-
+          activeTodos,
+          completedTodos,
+          filteredTodos,
+          addTodo,
+          removeTodo,
+          clearCompleted
         }
       }
     }).mount('#app')
