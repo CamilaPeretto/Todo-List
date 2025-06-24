@@ -324,20 +324,19 @@
         <div v-if="filteredTodos.length === 0" class="empty-state">
           <div class="empty-icon">📋</div>
             <p v-if="todos.length === 0">Nenhuma tarefa adicionada ainda</p>
-            <p v-else>Nenhuma tarefa {{ currentFilter === 'completed' ? 'concluída' : 'ativa' }}</p> <!---->
+            <p v-else>Nenhuma tarefa {{ currentFilter === 'completed' ? 'concluída' : 'ativa' }}</p>
         </div>
 
-        <transition-group name="todo" tag="ul" class="todo-list">
-            <li v-for="todo in filteredTodos" :key="todo.id" :class="['todo-item', { completed: todo.completed }]"> <!---->
+        <ul class="todo-list">
+            <li v-for="todo in filteredTodos" :key="todo.id" :class="['todo-item', { completed: todo.completed }, ]">
               <div class="todo-content">
-                <input type="checkbox" v-model="todo.completed" @change="saveTodos" class="todo-checkbox"/> <!---->
-                <span class="todo-text">{{ todo.text }}</span> <!---->
-                <span class="todo-date">{{ formatDate(todo.createdAt) }}</span> <!---->
+                <input type="checkbox" v-model="todo.completed" @change="saveTodos" class="todo-checkbox"/>
+                <span class="todo-text">{{ todo.text }}</span>
+                <span class="todo-date">{{ formatDate(todo.createdAt) }}</span>
               </div>
-              <button @click="removeTodo(todo.id)" class="remove-btn">🗑️</button> <!---->
+              <button @click="removeTodo(todo.id)" class="remove-btn">🗑️</button>
             </li>
-        </transition-group>
-      </div>
+        </ul>
 
       <footer class="app-footer">
         <div class="stats">
@@ -409,15 +408,22 @@
         }
 
         const loadTodos = () => {
-          const saved = localStorage.getItem('vue-todos')
-          if (saved) {
-            todos.value = JSON.parse(saved).map(todo => ({
-              ...todo,
-              createdAt: new Date(todo.createdAt)
-            }))
+          try {
+            const saved = localStorage.getItem("vue-todos");
+            if (saved) {
+              todos.value = JSON.parse(saved).map((todo) => ({
+                ...todo,
+                createdAt: new Date(todo.createdAt),
+              }));
+            }
+          } 
+          
+          catch (e) {
+            console.error("Erro ao carregar tarefas do localStorage:", e);
+            todos.value = []; 
           }
-        }
-
+        };     
+        
         const formatDate = (date) => {
           return new Intl.DateTimeFormat('pt-BR', {
             day: '2-digit',
@@ -442,7 +448,8 @@
           addTodo,
           removeTodo,
           clearCompleted,
-          saveTodos
+          saveTodos,
+          formatDate
         }
       }
     }).mount('#app')
