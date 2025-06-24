@@ -129,6 +129,94 @@
       border-color: #667eea;
     }
 
+    .todo-list-container {
+      flex: 1;
+      padding: 2rem;
+      background: white;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #6c757d;
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .todo-list {
+      list-style: none;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+      background: #f8f9fa;
+      border-left: 4px solid #667eea;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .todo-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .todo-item.completed {
+      opacity: 0.7;
+      border-left-color: #28a745;
+    }
+
+    .todo-item.completed .todo-text {
+      text-decoration: line-through;
+    }
+
+    .todo-content {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex: 1;
+    }
+
+    .todo-checkbox {
+      width: 1.2rem;
+      height: 1.2rem;
+      cursor: pointer;
+    }
+
+    .todo-text {
+      flex: 1;
+      font-size: 1rem;
+    }
+
+    .todo-date {
+      font-size: 0.8rem;
+      color: #6c757d;
+      margin-left: auto;
+      margin-right: 1rem;
+    }
+
+    .remove-btn {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+
+    .remove-btn:hover {
+      background: #fee;
+    }
+
     @media (max-width: 768px) {
       
       .app-header h1 {
@@ -141,6 +229,15 @@
 
       .filters {
         flex-wrap: wrap;
+      }
+
+      .todo-content {
+        flex-wrap: wrap;
+      }
+    
+      .todo-date {
+        margin-left: 0;
+        margin-right: 0;
       }
     }
 
@@ -163,10 +260,27 @@
       </div>
 
       <div class="filters">
-        <button v-for="filter in filters" :key="filter.key" @click="currentFilter = filter.key" :class="['filter-btn', { active: currentFilter === filter.key }]"> {{ filter.label }} </button>
+        <button v-for="filter in filters" :key="filter.key" @click="currentFilter = filter.key" :class="['filter-btn', { active: currentFilter === filter.key }]"> {{ filter.label }} </button> <!---->
       </div>
 
+      <div class="todo-list-container">
+        <div v-if="filteredTodos.length === 0" class="empty-state">
+          <div class="empty-icon">📋</div>
+            <p v-if="todos.length === 0">Nenhuma tarefa adicionada ainda</p>
+            <p v-else>Nenhuma tarefa {{ currentFilter === 'completed' ? 'concluída' : 'ativa' }}</p> <!---->
+        </div>
 
+        <transition-group name="todo" tag="ul" class="todo-list">
+            <li v-for="todo in filteredTodos" :key="todo.id" :class="['todo-item', { completed: todo.completed }]"> <!---->
+              <div class="todo-content">
+                <input type="checkbox" v-model="todo.completed" @change="saveTodos" class="todo-checkbox"/> <!---->
+                <span class="todo-text">{{ todo.text }}</span> <!---->
+                <span class="todo-date">{{ formatDate(todo.createdAt) }}</span> <!---->
+              </div>
+              <button @click="removeTodo(todo.id)" class="remove-btn">🗑️</button> <!---->
+            </li>
+        </transition-group>
+      </div>
     </div>
   </div>
 
@@ -176,7 +290,7 @@
     createApp({
       setup() {
         const newTodo = ref('')
-        const message = ref('')
+        const todos = ref([])
         const currentFilter = ref('all')
         
         const filters = [
@@ -187,22 +301,38 @@
 
         const addTodo = () => {
           if (newTodo.value.trim()) {
-            todos.value.push({ 
+            const todo = { 
               id: Date.now(),
               text: newTodo.value.trim(),
               completed: false,
               createdAt: new Date()
-            })
+            }
+            todos.value.push(todo)
             newTodo.value = ''
-            message.value = 'Tarefa adicionada com sucesso!'
-            setTimeout(() => {message.value = ''}, 3000)
+            saveTodos()
           }
+        }
+
+        const removeTodo = (id) => {
+          todos.value = todos.value.filter(todo => todo.id !== id)
+          saveTodos()
+        }
+
+        const clearCompleted = () => {
+          todos.value = activeTodos.value
+          saveTodos()
         }
 
         return {
           newTodo,
           message,
-          addTodo
+          addTodo,
+          removeTodo,
+          clearCompleted,
+          currentFilter,
+          filters,
+          saveTodos,
+
         }
       }
     }).mount('#app')
