@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Tarefas</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    #app {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .todo-app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .app-header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      font-weight: 300;
+    }
+
+    .app-header p {
+      opacity: 0.9;
+      font-size: 1.1rem;
+    }
+
+    .todo-input-section {
+      padding: 2rem;
+      background: #f8f9fa;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .input-container {
+      display: flex;
+      gap: 1rem;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .todo-input {
+      flex: 1;
+      padding: 1rem;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .todo-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .add-btn {
+      padding: 1rem 1.5rem;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      white-space: nowrap; /**/
+    }
+
+    .add-btn:hover:not(:disabled) {
+      background: #5a6fd8;
+    }
+
+    .add-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .filters {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      background: white;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      border: 2px solid #e9ecef;
+      background: white;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .filter-btn:hover {
+      border-color: #667eea;
+    }
+
+    .filter-btn.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .todo-list-container {
+      flex: 1;
+      padding: 2rem;
+      background: white;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #6c757d;
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .todo-list {
+      list-style: none;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+      background: #f8f9fa;
+      border-left: 4px solid #667eea;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .todo-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .todo-item.completed {
+      opacity: 0.7;
+      border-left-color: #28a745;
+    }
+
+    .todo-item.completed .todo-text {
+      text-decoration: line-through;
+    }
+
+    .todo-content {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex: 1;
+    }
+
+    .todo-checkbox {
+      width: 1.2rem;
+      height: 1.2rem;
+      cursor: pointer;
+    }
+
+    .todo-text {
+      flex: 1;
+      font-size: 1rem;
+    }
+
+    .todo-date {
+      font-size: 0.8rem;
+      color: #6c757d;
+      margin-left: auto;
+      margin-right: 1rem;
+    }
+
+    .remove-btn {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+
+    .remove-btn:hover {
+      background: #fee;
+    }
+
+    .app-footer {
+      background: #f8f9fa;
+      padding: 1.5rem 2rem;
+      border-top: 1px solid #e9ecef;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+}
+
+    .stats {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+
+    .clear-btn {
+      padding: 0.5rem 1rem;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.3s ease;
+    }
+
+    .clear-btn:hover {
+      background: #c82333;
+    }
+
+    .todo-enter-active, .todo-leave-active {
+      transition: all 0.3s ease;
+    }
+
+    .todo-enter-from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+
+    .todo-leave-to {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+
+    @media (max-width: 768px) {
+      
+      .app-header h1 {
+        font-size: 2rem;
+      }
+
+      .input-container {
+        flex-direction: column;
+      }
+
+      .filters {
+        flex-wrap: wrap;
+      }
+
+      .todo-content {
+        flex-wrap: wrap;
+      }
+    
+      .todo-date {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .app-footer {
+        flex-direction: column;
+        text-align: center;
+      }
+    
+      .stats {
+      justify-content: center;
+      }
+
+    }
+
+  </style>
+
+</head>
+<body>
+
+  <div id="app">
+    <div class="todo-app">
+      <header class="app-header">
+        <h1>Lista de Tarefas</h1>
+        <p>Organize suas atividades diárias</p>
+      </header>
+      <div class="todo-input-section">
+        <div class="input-container">
+          <!-- Input controlado por v-model para nova tarefa -->
+          <input v-model="newTodo" @keyup.enter="addTodo" type="text" placeholder="Digite uma nova tarefa..." class="todo-input" /> <!---->
+          <!-- Botão de adicionar tarefa, desativado se o campo estiver vazio -->
+          <button @click="addTodo" class="add-btn" :disabled="!newTodo.trim()">Adicionar</button> <!---->
+        </div>
+      </div>
+
+      <div class="filters">
+        <!-- Botões de filtro de tarefas (todas, ativas, concluídas) -->
+        <button v-for="filter in filters" :key="filter.key" @click="currentFilter = filter.key" :class="['filter-btn', { active: currentFilter === filter.key }]"> {{ filter.label }} </button> <!---->
+      </div>
+
+      <div class="todo-list-container">
+        <div v-if="filteredTodos.length === 0" class="empty-state">
+          <div class="empty-icon">📋</div>
+            <p v-if="todos.length === 0">Nenhuma tarefa adicionada ainda</p>
+            <p v-else>Nenhuma tarefa {{ currentFilter === 'completed' ? 'concluída' : 'ativa' }}</p>
+        </div>
+
+        <ul class="todo-list">
+          <!-- Lista de tarefas filtradas dinamicamente -->
+            <li v-for="todo in filteredTodos" :key="todo.id" :class="['todo-item', { completed: todo.completed }, ]">
+              <div class="todo-content">
+                <!-- Checkbox para marcar tarefa como concluída -->
+                <input type="checkbox" v-model="todo.completed" @change="saveTodos" class="todo-checkbox"/>
+                <span class="todo-text">{{ todo.text }}</span>
+                <!-- Data formatada -->
+                <span class="todo-date">{{ formatDate(todo.createdAt) }}</span>
+              </div>
+              <!-- Botão para remover tarefa -->
+              <button @click="removeTodo(todo.id)" class="remove-btn">🗑️</button>
+            </li>
+        </ul>
+
+      <footer class="app-footer">
+        <div class="stats">
+          <!-- Rodapé com estatísticas e botão para limpar tarefas concluídas -->
+          <span>Total: {{ todos.length }}</span> <!---->
+          <span>Ativas: {{ activeTodos.length }}</span> <!---->
+          <span>Concluídas: {{ completedTodos.length }}</span> <!---->
+        </div>
+        <button v-if="completedTodos.length > 0" @click="clearCompleted" class="clear-btn">Limpar Concluídas</button> <!---->
+      </footer>
+
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, reactive, computed, watch, onMounted } = Vue; 
+
+    createApp({
+      setup() {
+        // Reatividade com Vue 3
+        const newTodo = ref('') // Campo da nova tarefa
+        const todos = ref([]) // Lista completa de tarefas
+        const currentFilter = ref('all') // Filtro atual
+        
+        const filters = [
+          { key: 'all', label: 'Todas' },
+          { key: 'active', label: 'Ativas' },
+          { key: 'completed', label: 'Concluídas' }
+        ]
+
+        // Computed para filtrar tarefas
+        const activeTodos = computed(() => todos.value.filter(todo => !todo.completed))
+        const completedTodos = computed(() => todos.value.filter(todo => todo.completed))
+
+        const filteredTodos = computed(() => {
+          switch (currentFilter.value) {
+            case 'active':
+              return activeTodos.value
+            case 'completed':
+              return completedTodos.value
+            default:
+              return todos.value
+          }
+        })
+
+        // Adiciona nova tarefa com data atual e ID único
+        const addTodo = () => {
+          if (newTodo.value.trim()) {
+            const todo = { 
+              id: Date.now(),  // Garante ID único com timestamp
+              text: newTodo.value.trim(), // Texto da tarefa
+              completed: false, // Começa como não concluída
+              createdAt: new Date() // Data de criação da tarefa
+            }
+            todos.value.push(todo)
+            newTodo.value = ''
+            saveTodos()
+          }
+        }
+      
+        // Remove tarefa pelo ID
+        const removeTodo = (id) => {
+          todos.value = todos.value.filter(todo => todo.id !== id)
+          saveTodos()
+        }
+
+        // Limpa tarefas concluídas, mantendo apenas as ativas
+        const clearCompleted = () => {
+          todos.value = activeTodos.value
+          saveTodos()
+        }
+
+        // Salva tarefas no localStorage
+        const saveTodos = () => {
+          localStorage.setItem('vue-todos', JSON.stringify(todos.value))
+        }
+
+        // Carrega tarefas do localStorage ao iniciar
+        const loadTodos = () => {
+          try {
+            const saved = localStorage.getItem("vue-todos");
+            if (saved) {
+              todos.value = JSON.parse(saved).map((todo) => ({
+                ...todo,
+                createdAt: new Date(todo.createdAt), // Reconverte a data
+              }));
+            }
+          } 
+          
+          catch (e) {
+            console.error("Erro ao carregar tarefas do localStorage:", e);
+            todos.value = []; 
+          }
+        };     
+        
+        // Formata a data para exibição
+        const formatDate = (date) => {
+          return new Intl.DateTimeFormat('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+          }).format(date)
+        }
+
+        // Carrega tarefas ao montar o componente
+        onMounted(() => {
+          loadTodos()
+        })
+
+        return {
+          newTodo,
+          todos,
+          currentFilter,
+          filters,
+          activeTodos,
+          completedTodos,
+          filteredTodos,
+          addTodo,
+          removeTodo,
+          clearCompleted,
+          saveTodos,
+          formatDate
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+</html>
