@@ -101,15 +101,49 @@
       cursor: not-allowed;
     }
 
+    .filters {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      background: white;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      border: 2px solid #e9ecef;
+      background: white;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .filter-btn:hover {
+      border-color: #667eea;
+    }
+
+    .filter-btn.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
     @media (max-width: 768px) {
+      
       .app-header h1 {
-    font-size: 2rem;
-        }
+        font-size: 2rem;
+      }
 
       .input-container {
-    flex-direction: column;
-        }
+        flex-direction: column;
       }
+
+      .filters {
+        flex-wrap: wrap;
+      }
+    }
+
   </style>
 
 </head>
@@ -127,8 +161,15 @@
           <button @click="addTodo" class="add-btn" :disabled="!newTodo.trim()">Adicionar</button> <!---->
         </div>
       </div>
+
+      <div class="filters">
+        <button v-for="filter in filters" :key="filter.key" @click="currentFilter = filter.key" :class="['filter-btn', { active: currentFilter === filter.key }]"> {{ filter.label }} </button>
+      </div>
+
+
     </div>
   </div>
+
   <script>
     const { createApp, ref, reactive, computed, watch, onMounted } = Vue; 
 
@@ -136,6 +177,13 @@
       setup() {
         const newTodo = ref('')
         const message = ref('')
+        const currentFilter = ref('all')
+        
+        const filters = [
+          { key: 'all', label: 'Todas' },
+          { key: 'active', label: 'Ativas' },
+          { key: 'completed', label: 'Concluídas' }
+        ]
 
         const addTodo = () => {
           if (newTodo.value.trim()) {
