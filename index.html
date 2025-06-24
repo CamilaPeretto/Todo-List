@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Tarefas</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    #app {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .todo-app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .app-header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      font-weight: 300;
+    }
+
+    .app-header p {
+      opacity: 0.9;
+      font-size: 1.1rem;
+    }
+
+    .todo-input-section {
+      padding: 2rem;
+      background: #f8f9fa;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .input-container {
+      display: flex;
+      gap: 1rem;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .todo-input {
+      flex: 1;
+      padding: 1rem;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .todo-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .add-btn {
+      padding: 1rem 1.5rem;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      white-space: nowrap; /**/
+    }
+
+    .add-btn:hover:not(:disabled) {
+      background: #5a6fd8;
+    }
+
+    .add-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 768px) {
+      .app-header h1 {
+    font-size: 2rem;
+        }
+
+      .input-container {
+    flex-direction: column;
+        }
+      }
+  </style>
+
+</head>
+<body>
+
+  <div id="app">
+    <div class="todo-app">
+      <header class="app-header">
+        <h1>Lista de Tarefas</h1>
+        <p>Organize suas atividades diárias</p>
+      </header>
+      <div class="todo-input-section">
+        <div class="input-container">
+          <input v-model="newTodo" @keyup.enter="addTodo" type="text" placeholder="Digite uma nova tarefa..." class="todo-input" /> <!---->
+          <button @click="addTodo" class="add-btn" :disabled="!newTodo.trim()">Adicionar</button> <!---->
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const { createApp, ref, reactive, computed, watch, onMounted } = Vue; 
+
+    createApp({
+      setup() {
+        const newTodo = ref('')
+        const message = ref('')
+
+        const addTodo = () => {
+          if (newTodo.value.trim()) {
+            todos.value.push({ 
+              id: Date.now(),
+              text: newTodo.value.trim(),
+              completed: false,
+              createdAt: new Date()
+            })
+            newTodo.value = ''
+            message.value = 'Tarefa adicionada com sucesso!'
+            setTimeout(() => {message.value = ''}, 3000)
+          }
+        }
+
+        return {
+          newTodo,
+          message,
+          addTodo
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+</html>
