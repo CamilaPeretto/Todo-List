@@ -311,12 +311,15 @@
       </header>
       <div class="todo-input-section">
         <div class="input-container">
+          <!-- Input controlado por v-model para nova tarefa -->
           <input v-model="newTodo" @keyup.enter="addTodo" type="text" placeholder="Digite uma nova tarefa..." class="todo-input" /> <!---->
+          <!-- Botão de adicionar tarefa, desativado se o campo estiver vazio -->
           <button @click="addTodo" class="add-btn" :disabled="!newTodo.trim()">Adicionar</button> <!---->
         </div>
       </div>
 
       <div class="filters">
+        <!-- Botões de filtro de tarefas (todas, ativas, concluídas) -->
         <button v-for="filter in filters" :key="filter.key" @click="currentFilter = filter.key" :class="['filter-btn', { active: currentFilter === filter.key }]"> {{ filter.label }} </button> <!---->
       </div>
 
@@ -328,18 +331,23 @@
         </div>
 
         <ul class="todo-list">
+          <!-- Lista de tarefas filtradas dinamicamente -->
             <li v-for="todo in filteredTodos" :key="todo.id" :class="['todo-item', { completed: todo.completed }, ]">
               <div class="todo-content">
+                <!-- Checkbox para marcar tarefa como concluída -->
                 <input type="checkbox" v-model="todo.completed" @change="saveTodos" class="todo-checkbox"/>
                 <span class="todo-text">{{ todo.text }}</span>
+                <!-- Data formatada -->
                 <span class="todo-date">{{ formatDate(todo.createdAt) }}</span>
               </div>
+              <!-- Botão para remover tarefa -->
               <button @click="removeTodo(todo.id)" class="remove-btn">🗑️</button>
             </li>
         </ul>
 
       <footer class="app-footer">
         <div class="stats">
+          <!-- Rodapé com estatísticas e botão para limpar tarefas concluídas -->
           <span>Total: {{ todos.length }}</span> <!---->
           <span>Ativas: {{ activeTodos.length }}</span> <!---->
           <span>Concluídas: {{ completedTodos.length }}</span> <!---->
@@ -355,9 +363,10 @@
 
     createApp({
       setup() {
-        const newTodo = ref('')
-        const todos = ref([])
-        const currentFilter = ref('all')
+        // Reatividade com Vue 3
+        const newTodo = ref('') // Campo da nova tarefa
+        const todos = ref([]) // Lista completa de tarefas
+        const currentFilter = ref('all') // Filtro atual
         
         const filters = [
           { key: 'all', label: 'Todas' },
@@ -365,6 +374,7 @@
           { key: 'completed', label: 'Concluídas' }
         ]
 
+        // Computed para filtrar tarefas
         const activeTodos = computed(() => todos.value.filter(todo => !todo.completed))
         const completedTodos = computed(() => todos.value.filter(todo => todo.completed))
 
@@ -379,41 +389,46 @@
           }
         })
 
+        // Adiciona nova tarefa com data atual e ID único
         const addTodo = () => {
           if (newTodo.value.trim()) {
             const todo = { 
-              id: Date.now(),
-              text: newTodo.value.trim(),
-              completed: false,
-              createdAt: new Date()
+              id: Date.now(),  // Garante ID único com timestamp
+              text: newTodo.value.trim(), // Texto da tarefa
+              completed: false, // Começa como não concluída
+              createdAt: new Date() // Data de criação da tarefa
             }
             todos.value.push(todo)
             newTodo.value = ''
             saveTodos()
           }
         }
-
+      
+        // Remove tarefa pelo ID
         const removeTodo = (id) => {
           todos.value = todos.value.filter(todo => todo.id !== id)
           saveTodos()
         }
 
+        // Limpa tarefas concluídas, mantendo apenas as ativas
         const clearCompleted = () => {
           todos.value = activeTodos.value
           saveTodos()
         }
 
+        // Salva tarefas no localStorage
         const saveTodos = () => {
           localStorage.setItem('vue-todos', JSON.stringify(todos.value))
         }
 
+        // Carrega tarefas do localStorage ao iniciar
         const loadTodos = () => {
           try {
             const saved = localStorage.getItem("vue-todos");
             if (saved) {
               todos.value = JSON.parse(saved).map((todo) => ({
                 ...todo,
-                createdAt: new Date(todo.createdAt),
+                createdAt: new Date(todo.createdAt), // Reconverte a data
               }));
             }
           } 
@@ -424,6 +439,7 @@
           }
         };     
         
+        // Formata a data para exibição
         const formatDate = (date) => {
           return new Intl.DateTimeFormat('pt-BR', {
             day: '2-digit',
@@ -433,6 +449,7 @@
           }).format(date)
         }
 
+        // Carrega tarefas ao montar o componente
         onMounted(() => {
           loadTodos()
         })
